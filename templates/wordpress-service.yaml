@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.enviroment }}-wordpress
+  namespace: {{ .Values.enviroment }}
+  labels:
+    app: {{ .Values.enviroment }}
+  annotations:
+    getambassador.io/config: |
+    {{- range .Values.wordpress.mappings }}
+      ---
+      apiVersion: ambassador/v1
+      kind: Mapping
+      name: {{ .name }}
+      prefix: /
+      service: {{ .service }}
+      host: {{ .host }}
+      timeout_ms: {{ .timeout_ms }}
+      idle_timeout_ms: {{ .idle_timeout_ms }}
+      connect_timeout_ms: {{ .connect_timeout_ms }}
+      host_redirect: {{ .host_redirect }}
+    {{- end }}
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: {{ .Values.enviroment }}
+    tier: {{ .Values.enviroment }}-frontend
+  type: ClusterIP

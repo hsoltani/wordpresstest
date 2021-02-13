@@ -1,0 +1,21 @@
+{{- range .Values.wordpress.mappings }}
+---
+apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: lesetraum-{{ .name }}-certs
+  namespace: default
+spec:
+  secretName: lesetraum-{{ .name }}-certs
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - {{ .host }}
+  acme:
+    config:
+    - http01:
+        ingressClass: nginx
+      domains:
+      - {{ .host }}
+{{- end }}

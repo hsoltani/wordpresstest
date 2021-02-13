@@ -1,0 +1,71 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.enviroment }}-mysql
+  namespace: {{ .Values.enviroment }}
+  labels:
+    app: {{ .Values.enviroment }}
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: {{ .Values.enviroment }}
+    tier: {{ .Values.enviroment }}-mysql
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.enviroment }}-mysql-pv-claim
+  namespace: {{ .Values.enviroment }}
+  labels:
+    app: {{ .Values.enviroment }}
+spec:
+  storageClassName: {{ .Values.enviroment }}-mysql-local
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ .Values.enviroment }}-mysql
+  namespace: {{ .Values.enviroment }}
+  labels:
+    app: {{ .Values.enviroment }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.enviroment }}
+      tier: {{ .Values.enviroment }}-mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.enviroment }}
+        tier: {{ .Values.enviroment }}-mysql
+    spec:
+      containers:
+      - image: {{ .Values.mysql.image }}
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.enviroment }}-mysql-pass
+              key: password
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: {{ .Values.enviroment }}-mysql-pv-claim
+

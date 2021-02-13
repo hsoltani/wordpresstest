@@ -1,0 +1,11 @@
+{{- range .Values.wordpress.mappings }}
+---
+apiVersion: getambassador.io/v1
+kind: TLSContext
+metadata:
+  name: lesetraum-{{ .name }}-tlscontext
+spec:
+  hosts:
+  - {{ .host }}
+  secret: lesetraum-{{ .name }}-certs
+{{- end }}
