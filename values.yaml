@@ -1,0 +1,29 @@
+# Default values for helm-wordpress.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Alle Wordings mit "merlin" (Bindestrich oder Punkt nicht vergessen) ändern bei neuem Wert für Key "enviroment"!
+
+enviroment: merlin # Produktion wäre default
+wordpress:
+  image: wordpress:5.3.2-php7.4-apache
+  mappings:
+  - name: merlin-wp-mapping
+    service: merlin-wordpress.merlin:80
+    host: merlin.lesetraum.blog
+    timeout_ms: 20000
+    idle_timeout_ms: 500000
+    connect_timeout_ms: 4000
+    host_redirect: false
+
+  # Nur bei Deployment von Prod aktivieren!
+  # - name: merlin-wp-www-mapping
+  #   service: merlin.lesetraum.blog
+  #   host: www.merlin.lesetraum.blog
+  #   timeout_ms: 10000
+  #   idle_timeout_ms: 500000
+  #   connect_timeout_ms: 4000
+  #   host_redirect: true
+mysql:
+  image: mariadb:10.4.11-bionic
+
